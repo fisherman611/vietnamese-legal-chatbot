@@ -1,0 +1,709 @@
+/* Google Gemini-inspired color scheme */
+:root {
+    --primary-blue: #4285f4;           /* Google Blue */
+    --primary-purple: #9c27b0;         /* Purple accent */
+    --primary-indigo: #5e57d1;         /* Indigo blend */
+    --secondary-blue: #1a73e8;         /* Darker blue */
+    --secondary-purple: #7b1fa2;       /* Darker purple */
+    --accent-gradient: linear-gradient(135deg, #4285f4 0%, #9c27b0 100%);
+    --light-gradient: linear-gradient(135deg, #e8f0fe 0%, #f3e5f5 100%);
+    --success-color: #34a853;          /* Google Green */
+    --warning-color: #fbbc04;          /* Google Yellow */
+    --error-color: #ea4335;            /* Google Red */
+    --background-color: #fafafa;       /* Very light gray */
+    --surface-color: #ffffff;          /* Pure white */
+    --surface-variant: #f8f9fa;        /* Light gray surface */
+    --border-color: #e0e0e0;           /* Light border */
+    --border-focus: #4285f4;           /* Blue focus */
+    --text-primary: #202124;           /* Dark gray text */
+    --text-secondary: #5f6368;         /* Medium gray text */
+    --text-muted: #9aa0a6;             /* Light gray text */
+    --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    --shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+    --shadow-md: 0 4px 8px 3px rgba(60, 64, 67, 0.15), 0 1px 3px rgba(60, 64, 67, 0.3);
+    --shadow-lg: 0 8px 12px 6px rgba(60, 64, 67, 0.15), 0 4px 4px rgba(60, 64, 67, 0.3);
+}
+
+.gradio-container {
+    font-family: "Google Sans", "Roboto", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--background-color);
+    min-height: 100vh;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--text-primary);
+}
+
+/* Full screen layout */
+.main-container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+/* Header styling - Gemini gradient */
+.main-header {
+    background: var(--accent-gradient);
+    padding: 1.5rem;
+    text-align: center;
+    color: white;
+    margin: 0;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+}
+
+.main-header h1 {
+    font-size: 2rem;
+    font-weight: 400;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.025em;
+}
+
+.main-header p {
+    font-size: 1rem;
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-weight: 300;
+    position: relative;
+    z-index: 1;
+}
+
+/* Chat container */
+.chat-container {
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* Main chat container - Gemini style */
+.chat-container-main {
+    border-radius: 16px;
+    border: 2px solid transparent;
+    background: var(--surface-color);
+    background-clip: padding-box;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    height: calc(100vh - 200px);
+    position: relative;
+}
+
+.chat-container-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--accent-gradient);
+    border-radius: 16px;
+    padding: 2px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    z-index: -1;
+}
+
+/* Sidebar headers */
+.sidebar-header {
+    background: var(--light-gradient);
+    color: var(--primary-blue);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+/* Main input styling */
+.main-input {
+    border: 2px solid var(--border-color) !important;
+    border-radius: 24px !important;
+    font-size: 1rem !important;
+    background: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+    padding: 0 16px !important;
+    transition: all 0.2s ease !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    box-sizing: border-box !important;
+    line-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.main-input:focus {
+    border-color: var(--border-focus) !important;
+    box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.1) !important;
+    background: var(--surface-color) !important;
+}
+
+/* Placeholder styling with perfect centering */
+.main-input::placeholder,
+.main-input textarea::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7 !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    line-height: 48px !important;
+    vertical-align: middle !important;
+    text-align: left !important;
+    position: relative !important;
+    top: 0 !important;
+}
+
+.main-input:focus::placeholder,
+.main-input textarea:focus::placeholder {
+    opacity: 0.5 !important;
+    transition: opacity 0.2s ease !important;
+}
+
+/* Input textarea placeholder fix with centering */
+.gr-textbox textarea::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7 !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    line-height: 48px !important;
+    vertical-align: middle !important;
+    text-align: left !important;
+}
+
+.gr-textbox textarea:focus::placeholder {
+    opacity: 0.5 !important;
+}
+
+/* Input text centering when typing */
+.main-input textarea,
+.gr-textbox textarea {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    padding: 0 16px !important;
+    border-radius: 24px !important;
+    box-sizing: border-box !important;
+    resize: none !important;
+    line-height: 48px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
+}
+
+/* Force textarea content to center */
+.gr-textbox {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.gr-textbox textarea {
+    text-align: left !important;
+    vertical-align: middle !important;
+}
+
+/* Aggressive send button targeting with matching height */
+.gradio-container .gr-button.primary,
+.gradio-container .send-button,
+.gradio-container button[variant="primary"],
+.gradio-container .gr-form .gr-button.primary {
+    background: var(--accent-gradient) !important;
+    background-image: var(--accent-gradient) !important;
+    border: none !important;
+    border-radius: 24px !important;
+    color: white !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    font-family: "Google Sans", "Roboto", sans-serif !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    min-width: 80px !important;
+    padding: 14px 20px !important;
+    box-shadow: var(--shadow) !important;
+    transition: all 0.2s ease !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Input row alignment */
+.gr-row:has(.main-input) {
+    align-items: center !important;
+    display: flex !important;
+}
+
+.gr-row:has(.main-input) > * {
+    align-self: center !important;
+}
+
+/* Override Gradio's default button styles completely */
+.gr-button[data-testid="primary-button"],
+button[data-testid="primary-button"] {
+    background: var(--accent-gradient) !important;
+    border: none !important;
+    border-radius: 24px !important;
+    height: 48px !important;
+    color: white !important;
+}
+
+/* Force override any conflicting styles */
+.gr-button.primary * {
+    color: white !important;
+}
+
+/* Specific targeting for the send button with emoji */
+button:contains("📤 Gửi"),
+button[title*="Gửi"],
+.gr-button:has-text("Gửi") {
+    background: var(--accent-gradient) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 24px !important;
+    height: 48px !important;
+    padding: 12px 20px !important;
+}
+
+/* Input row container for better alignment */
+.input-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Secondary button styling */
+.gr-button.secondary {
+    background: var(--surface-color) !important;
+    color: var(--text-secondary) !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 24px !important;
+    padding: 10px 16px !important;
+    height: auto !important;
+    font-size: 0.875rem !important;
+}
+
+/* Status displays */
+.status-ready {
+    background: var(--success-color);
+    color: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.status-loading {
+    background: var(--accent-gradient);
+    color: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.status-error {
+    background: var(--error-color);
+    color: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.status-ready h3, .status-loading h3, .status-error h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.status-details {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Progress bar */
+.progress-container {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    height: 6px;
+    margin: 0.75rem 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: var(--accent-gradient);
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.875rem;
+    font-weight: 400;
+    margin: 0.5rem 0 0 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Sample questions */
+.sample-category {
+    margin-bottom: 1rem;
+}
+
+.category-dropdown {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* Enhanced Dropdown styling with colors */
+.gr-dropdown {
+    border-radius: 12px !important;
+    border: 2px solid var(--border-color) !important;
+    background: var(--surface-color) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+}
+
+.gr-dropdown:hover {
+    border-color: var(--primary-blue) !important;
+    box-shadow: var(--shadow) !important;
+    transform: translateY(-1px) !important;
+}
+
+.gr-dropdown:focus-within {
+    border-color: var(--border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1), var(--shadow) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Dropdown label styling */
+.gr-dropdown label {
+    background: var(--light-gradient) !important;
+    color: var(--primary-blue) !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    padding: 8px 12px !important;
+    margin: 0 !important;
+    border-radius: 8px 8px 0 0 !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Dropdown input field */
+.gr-dropdown input,
+.gr-dropdown .gr-textbox {
+    background: var(--surface-color) !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    font-size: 0.95rem !important;
+    color: var(--text-primary) !important;
+    border-radius: 0 0 12px 12px !important;
+}
+
+.gr-dropdown input:focus,
+.gr-dropdown .gr-textbox:focus {
+    outline: none !important;
+    background: var(--surface-color) !important;
+    box-shadow: none !important;
+}
+
+/* Dropdown placeholder */
+.gr-dropdown input::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.8 !important;
+    font-style: italic !important;
+}
+
+/* Dropdown arrow/chevron */
+.gr-dropdown::after {
+    content: '▼' !important;
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--primary-blue) !important;
+    font-size: 0.8rem !important;
+    pointer-events: none !important;
+    transition: transform 0.2s ease !important;
+}
+
+.gr-dropdown:focus-within::after {
+    transform: translateY(-50%) rotate(180deg) !important;
+    color: var(--primary-indigo) !important;
+}
+
+/* Dropdown options container */
+.gr-dropdown .dropdown-options,
+.gr-dropdown [role="listbox"] {
+    background: var(--surface-color) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-lg) !important;
+    margin-top: 4px !important;
+    overflow: hidden !important;
+    z-index: 1000 !important;
+}
+
+/* Individual dropdown options */
+.gr-dropdown .dropdown-option,
+.gr-dropdown [role="option"] {
+    padding: 12px 16px !important;
+    font-size: 0.9rem !important;
+    color: var(--text-primary) !important;
+    background: var(--surface-color) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.gr-dropdown .dropdown-option:hover,
+.gr-dropdown [role="option"]:hover {
+    background: var(--light-gradient) !important;
+    color: var(--primary-blue) !important;
+    transform: translateX(2px) !important;
+}
+
+.gr-dropdown .dropdown-option:last-child,
+.gr-dropdown [role="option"]:last-child {
+    border-bottom: none !important;
+}
+
+.gr-dropdown .dropdown-option.selected,
+.gr-dropdown [role="option"][aria-selected="true"] {
+    background: var(--accent-gradient) !important;
+    color: white !important;
+    font-weight: 500 !important;
+}
+
+/* Category-specific dropdown colors */
+.sample-category:nth-child(1) .gr-dropdown {
+    border-left: 4px solid #4285f4 !important; /* Blue for business */
+}
+
+.sample-category:nth-child(2) .gr-dropdown {
+    border-left: 4px solid #34a853 !important; /* Green for labor */
+}
+
+.sample-category:nth-child(3) .gr-dropdown {
+    border-left: 4px solid #fbbc04 !important; /* Yellow for tax */
+}
+
+.sample-category:nth-child(4) .gr-dropdown {
+    border-left: 4px solid #ea4335 !important; /* Red for real estate */
+}
+
+.sample-category:nth-child(5) .gr-dropdown {
+    border-left: 4px solid #9c27b0 !important; /* Purple for family */
+}
+
+/* Loading state for dropdowns */
+.gr-dropdown.loading {
+    opacity: 0.7 !important;
+    pointer-events: none !important;
+}
+
+.gr-dropdown.loading::before {
+    content: '⟳' !important;
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    animation: spin 1s linear infinite !important;
+    color: var(--primary-blue) !important;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Documents display */
+.docs-display {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+}
+
+.docs-display h2 {
+    color: var(--primary-blue);
+    border-bottom: 2px solid var(--primary-purple);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.docs-display h3 {
+    color: var(--primary-indigo);
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.docs-display p {
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.docs-display strong {
+    color: var(--secondary-blue);
+}
+
+/* Input enhancements */
+.gr-textbox {
+    border-radius: 12px !important;
+    border: 1px solid var(--border-color) !important;
+    transition: all 0.2s ease !important;
+    background: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.gr-textbox:focus {
+    border-color: var(--border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1) !important;
+}
+
+/* Dropdown styling */
+.gr-dropdown {
+    border-radius: 12px !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--surface-color) !important;
+}
+
+.gr-dropdown:focus-within {
+    border-color: var(--border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1) !important;
+}
+
+/* Custom scrollbar - Gemini style */
+.docs-display::-webkit-scrollbar {
+    width: 6px;
+}
+
+.docs-display::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.docs-display::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+}
+
+.docs-display::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Full height layout */
+.gr-column {
+    height: calc(100vh - 140px) !important;
+}
+
+/* Card styling for grouped elements */
+.gr-group {
+    background: var(--surface-color) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-sm) !important;
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* Enhanced focus states */
+.gr-textbox:focus,
+.gr-dropdown:focus-within,
+.gr-button:focus {
+    outline: none !important;
+}
+
+/* Gemini-style chat messages */
+.gr-chatbot .message {
+    border-radius: 16px !important;
+    margin: 8px 0 !important;
+}
+
+.gr-chatbot .message.user {
+    background: var(--light-gradient) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.gr-chatbot .message.bot {
+    background: var(--surface-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .main-header p {
+        font-size: 0.875rem;
+    }
+    
+    .gr-column {
+        height: auto !important;
+    }
+    
+    .chat-container-main,
+    .docs-display {
+        height: 400px !important;
+    }
+    
+    .main-input {
+        border-radius: 16px !important;
+    }
+}
+
+/* General button styling */
+.gr-button {
+    border-radius: 24px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid var(--border-color) !important;
+    font-family: "Google Sans", "Roboto", sans-serif !important;
+    cursor: pointer !important;
+}
+
+.gr-button:hover {
+    transform: translateY(-0.5px) !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Secondary button hover */
+.gr-button.secondary:hover {
+    background: var(--surface-variant) !important;
+    border-color: var(--text-secondary) !important;
+}
+
+.gradio-container .gr-button.primary:hover,
+.gradio-container .send-button:hover,
+.gradio-container button[variant="primary"]:hover,
+.gradio-container .gr-form .gr-button.primary:hover {
+    background: var(--accent-gradient) !important;
+    background-image: var(--accent-gradient) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+    filter: brightness(1.05) !important;
+} 
