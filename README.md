@@ -12,7 +12,26 @@ A Retrieval-Augmented Generation (RAG) system designed to answer legal questions
 - **Vietnamese-Optimized** - Specifically designed for Vietnamese language processing and legal terminology
 
 ## **Dataset**
-The dataset used is from the [[Zalo-AI-2021] Legal Text Retrieval](https://www.kaggle.com/datasets/hariwh0/zaloai2021-legal-text-retrieval/data)
+The dataset used is from the [[Zalo-AI-2021] Legal Text Retrieval](https://www.kaggle.com/datasets/hariwh0/zaloai2021-legal-text-retrieval/data) dataset. Please download and restructure it to match the following format:
+```bash
+├── data/
+│   ├── train/
+│   │   ├── train_question_answer.json
+│   │   └── train_qna.csv
+│   ├── test/
+│   │   ├── public_test_question.json
+│   │   └── public_test_sample_submission.json
+│   ├── corpus/
+│   │   ├── legal_corpus_legend.csv
+│   │   ├── legal_corpus_splitted.csv
+│   │   ├── legal_corpus_original.csv
+│   │   ├── legal_corpus_merged_u369.csv
+│   │   ├── legal_corpus_merged_u256.csv
+│   │   ├── legal_corpus_hashmap.csv
+│   │   └── legal_corpus.json
+│   └── utils/
+│       └── stopwords.txt
+```
 ## **Architecture**
 
 The system follows a modern RAG architecture with three primary layers:
