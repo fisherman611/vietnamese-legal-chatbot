@@ -27,18 +27,18 @@
 .gradio-container {
     font-family: "Google Sans", "Roboto", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     background: var(--background-color);
-    min-height: 100vh;
-    max-width: none !important;
+    min-height: 600px;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     color: var(--text-primary);
 }
 
-/* Full screen layout */
+/* Flexible layout for Hugging Face */
 .main-container {
-    height: 100vh;
-    max-height: 100vh;
-    overflow: hidden;
+    min-height: 600px;
+    max-width: 100%;
+    overflow: visible;
 }
 
 /* Header styling - Gemini gradient */
@@ -97,8 +97,9 @@
     background: var(--surface-color);
     background-clip: padding-box;
     box-shadow: var(--shadow-lg);
-    overflow: hidden;
-    height: calc(100vh - 200px);
+    overflow-y: auto;
+    height: 500px;
+    max-height: 600px;
     position: relative;
 }
 
@@ -540,7 +541,8 @@ button[title*="Gửi"],
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.25rem;
-    height: calc(100vh - 200px);
+    height: 500px;
+    max-height: 600px;
     overflow-y: auto;
     box-shadow: var(--shadow);
 }
@@ -614,9 +616,10 @@ button[title*="Gửi"],
     background: var(--text-secondary);
 }
 
-/* Full height layout */
+/* Flexible height layout */
 .gr-column {
-    height: calc(100vh - 140px) !important;
+    min-height: 500px !important;
+    height: auto !important;
 }
 
 /* Card styling for grouped elements */
@@ -664,15 +667,21 @@ button[title*="Gửi"],
     
     .gr-column {
         height: auto !important;
+        min-height: 400px !important;
     }
     
     .chat-container-main,
     .docs-display {
         height: 400px !important;
+        max-height: 500px !important;
     }
     
     .main-input {
         border-radius: 16px !important;
+    }
+    
+    .main-container {
+        min-height: 500px;
     }
 }
 
@@ -706,4 +715,36 @@ button[title*="Gửi"],
     transform: translateY(-1px) !important;
     box-shadow: var(--shadow-md) !important;
     filter: brightness(1.05) !important;
-} 
+}
+
+/* Hugging Face Spaces specific fixes */
+.gradio-container .main {
+    max-width: 100% !important;
+    padding: 1rem !important;
+}
+
+/* Ensure proper spacing */
+.gr-row {
+    margin-bottom: 1rem !important;
+}
+
+.gr-column {
+    padding: 0.5rem !important;
+}
+
+/* Fix any potential scrolling issues */
+body {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+html {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+/* Ensure components don't exceed container width */
+.gradio-container * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}

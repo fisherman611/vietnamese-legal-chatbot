@@ -516,7 +516,7 @@ def create_chatbot_interface():
                 chatbot_component = gr.Chatbot(
                     label="💬 Trợ lý Pháp lý",
                     elem_classes="chat-container-main",
-                    height="calc(100vh - 180px)",
+                    height=500,
                     show_copy_button=True
                 )
                 
