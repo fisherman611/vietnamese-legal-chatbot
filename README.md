@@ -129,7 +129,7 @@ flowchart LR
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/vietnamese-legal-chatbot.git
+git clone https://github.com/fisherman611/vietnamese-legal-chatbot.git
 cd vietnamese-legal-chatbot
 ```
 
