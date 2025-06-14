@@ -1,6 +1,6 @@
 # **Vietnamese Legal Chatbot**
 
-A Retrieval-Augmented Generation (RAG) system designed to answer legal questions in Vietnamese, providing accurate and contextually relevant responses based on Vietnamese legal documents.
+A Retrieval-Augmented Generation (RAG) system designed to answer legal questions in Vietnamese, providing accurate and contextually relevant responses based on Vietnamese legal documents. [Demo](https://huggingface.co/spaces/fisherman611/vietnamese-legal-chatbot)
 
 ## **Features**
 
