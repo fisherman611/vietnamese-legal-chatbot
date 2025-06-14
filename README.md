@@ -79,7 +79,7 @@ flowchart LR
     LLM ==> Response["📤 Final Response"]
     
     %% Fallback System
-    Hybrid -.->|"⚠️ Low Relevance"| FB["🔄 Fallback Handler"]
+    Hybrid -.->|"⚠️ Insufficient Information"| FB["🔄 Fallback Handler"]
     FB ==> GS["🌐 Google Search API<br/>External Knowledge"]
     GS ==> CT
     
