@@ -17,6 +17,7 @@ class VietnameseTextProcessor:
             # Try UTF-8 first
             with open(Config.STOPWORDS_PATH, "r", encoding="utf-8") as f:
                 stopwords = set(line.strip() for line in f if line.strip())
+                stopwords = set(['_'.join(word.split()) for word in list(stopwords)])
             return stopwords
         except UnicodeDecodeError:
             try:
