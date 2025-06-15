@@ -76,7 +76,10 @@ class VietnameseLegalRAG:
                             
                             if force_rebuild:
                                 print("Force rebuild requested - recreating vector store...")
-                                self.vector_store.create_collection(force_recreate=True)
+                                if Config.EMBEDDING_MODEL == "bkai-foundation-models/vietnamese-bi-encoder":
+                                    self.vector_store.create_collection(force_recreate=True, vector_size=768)
+                                else:
+                                    self.vector_store.create_collection(force_recreate=True)
                                 self.vector_store.add_documents(documents)
                             elif not has_documents:
                                 print("Collection exists but is empty - adding documents...")
@@ -87,20 +90,29 @@ class VietnameseLegalRAG:
                             print(f"Could not get collection info: {info_e}")
                             if force_rebuild:
                                 print("Force rebuild requested - recreating vector store...")
-                                self.vector_store.create_collection(force_recreate=True)
+                                if Config.EMBEDDING_MODEL == "bkai-foundation-models/vietnamese-bi-encoder":
+                                    self.vector_store.create_collection(force_recreate=True, vector_size=768)
+                                else:
+                                    self.vector_store.create_collection(force_recreate=True)
                                 self.vector_store.add_documents(documents)
                             else:
                                 print("Assuming collection has documents - skipping setup")
                     else:
                         # Collection doesn't exist, create it
                         print("Collection does not exist - creating new collection...")
-                        self.vector_store.create_collection(force_recreate=False)
+                        if Config.EMBEDDING_MODEL == "bkai-foundation-models/vietnamese-bi-encoder":
+                            self.vector_store.create_collection(force_recreate=True, vector_size=768)
+                        else:
+                            self.vector_store.create_collection(force_recreate=True)
                         self.vector_store.add_documents(documents)
                         
                 except Exception as e:
                     print(f"Error during vector store setup: {e}")
                     print("Attempting to create collection...")
-                    self.vector_store.create_collection()
+                    if Config.EMBEDDING_MODEL == "bkai-foundation-models/vietnamese-bi-encoder":
+                        self.vector_store.create_collection(force_recreate=True, vector_size=768)
+                    else:
+                        self.vector_store.create_collection(force_recreate=True)
                     self.vector_store.add_documents(documents)
             
             # Setup BM25 index
