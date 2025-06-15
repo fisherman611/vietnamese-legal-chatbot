@@ -30,21 +30,21 @@ class Config:
 
     # RAG Configuration
     TOP_K_RETRIEVAL = 15
-    BM25_TOP_K = 15
-    SIMILARITY_THRESHOLD = 0.5
+    BM25_TOP_K = 20
+    SIMILARITY_THRESHOLD = 0.25
 
     # Reranker Configuration
     ENABLE_RERANKING = True
     RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-    RERANKER_TOP_K = 10  # Final number of documents after reranking
-    RERANK_BEFORE_RETRIEVAL_TOP_K = 15  # Retrieve more docs before ranking
-    USE_SCORE_FUSION = True  # Use fusion between original and reranker scores
-    RERANKER_FUSION_ALPHA = 0.6  # Weight for reranker score in fusion (0-1)
+    RERANKER_TOP_K = 10
+    RERANK_BEFORE_RETRIEVAL_TOP_K = 25
+    USE_SCORE_FUSION = True
+    RERANKER_FUSION_ALPHA = 0.8
 
     # Google Search Configuration
     ENABLE_GOOGLE_SEARCH = True
     GOOGLE_SEARCH_RESULTS_COUNT = 10
-    MIN_SIMILARITY_FOR_LEGAL_DOCS = 0.3
+    MIN_SIMILARITY_FOR_LEGAL_DOCS = 0.15
 
     # Question Refinement Configuration
     ENABLE_QUESTION_REFINEMENT = True

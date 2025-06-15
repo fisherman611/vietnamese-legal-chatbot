@@ -78,10 +78,51 @@ class VietnameseTextProcessor:
         return [token for token in tokens if token.lower() not in self.stopwords]
 
     def preprocess_for_search(self, text: str) -> str:
-        """Preprocess text for search - tokenize and remove stopwords"""
+        """Preprocess text for search - tokenize and remove stopwords with legal term preservation"""
+        # First, preserve important legal patterns and identifiers
+        preserved_patterns = []
+        
+        # Preserve legal document IDs (e.g., "47/2011/tt-bca", "159/2020/nđ-cp")
+        legal_id_pattern = r'\d+/\d+/[a-z\-]+'
+        legal_ids = re.findall(legal_id_pattern, text, re.IGNORECASE)
+        for legal_id in legal_ids:
+            placeholder = f"LEGALID_{len(preserved_patterns)}"
+            preserved_patterns.append((placeholder, legal_id))
+            text = text.replace(legal_id, placeholder)
+        
+        # Preserve important legal terms and phrases
+        legal_terms = [
+            r'điều\s+\d+',  # "điều 15", "điều 20"
+            r'khoản\s+\d+',  # "khoản 1", "khoản 2"
+            r'điểm\s+[a-z]',  # "điểm a", "điểm b"
+            r'nghị\s+định',
+            r'thông\s+tư',
+            r'quyết\s+định',
+            r'luật\s+\w+',
+            r'vi\s+phạm',
+            r'xử\s+phạt',
+            r'mức\s+phạt',
+        ]
+        
+        for pattern in legal_terms:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                placeholder = f"LEGALTERM_{len(preserved_patterns)}"
+                preserved_patterns.append((placeholder, match))
+                text = text.replace(match, placeholder)
+        
+        # Normal tokenization and stopword removal
         tokens = self.tokenize(text)
         filtered_tokens = self.remove_stopwords(tokens)
-        return " ".join(filtered_tokens)
+        
+        # Reconstruct text
+        processed_text = " ".join(filtered_tokens)
+        
+        # Restore preserved patterns
+        for placeholder, original in preserved_patterns:
+            processed_text = processed_text.replace(placeholder, original)
+        
+        return processed_text
 
     def extract_keywords(self, text: str, min_length: int = 2) -> List[str]:
         """Extract keywords from text"""

@@ -144,16 +144,20 @@ class VietnameseLegalRAG:
                     query, top_k=vector_top_k
                 )
                 
-                # Combine and deduplicate results
+                # Combine and deduplicate results with better scoring
                 all_docs = {}
                 
-                # Add BM25 results
+                # Add BM25 results with proper scoring
                 for doc in bm25_results:
                     doc_id = doc.get('id', '')
                     if doc_id:
-                        all_docs[doc_id] = {**doc, 'retrieval_method': 'bm25'}
+                        all_docs[doc_id] = {
+                            **doc, 
+                            'retrieval_method': 'bm25',
+                            'bm25_score': doc.get('score', 0)
+                        }
                 
-                # Add vector results
+                # Add vector results with proper scoring
                 for doc in vector_results:
                     doc_id = doc.get('id', '')
                     if doc_id:
@@ -161,10 +165,22 @@ class VietnameseLegalRAG:
                             # Combine scores if document found by both methods
                             all_docs[doc_id]['retrieval_method'] = 'hybrid'
                             all_docs[doc_id]['vector_score'] = doc.get('score', 0)
+                            # Use higher score as main score for now
+                            all_docs[doc_id]['score'] = max(
+                                all_docs[doc_id].get('bm25_score', 0),
+                                doc.get('score', 0)
+                            )
                         else:
-                            all_docs[doc_id] = {**doc, 'retrieval_method': 'vector'}
+                            all_docs[doc_id] = {
+                                **doc, 
+                                'retrieval_method': 'vector',
+                                'vector_score': doc.get('score', 0)
+                            }
                 
                 retrieved_docs = list(all_docs.values())
+                
+                # Sort by score for better ranking
+                retrieved_docs.sort(key=lambda x: x.get('score', 0), reverse=True)
                 
             elif self.vector_store:
                 # Vector search only
@@ -224,6 +240,14 @@ class VietnameseLegalRAG:
                 
                 else:
                     print("No documents found with sufficient similarity scores")
+                    # Fallback: return best available documents anyway (with lower threshold)
+                    if retrieved_docs:
+                        print(f"Fallback: returning top {min(5, len(retrieved_docs))} documents with best scores")
+                        # Sort by score and return best ones
+                        retrieved_docs.sort(key=lambda x: x.get('score', 0), reverse=True)
+                        fallback_docs = retrieved_docs[:min(5, len(retrieved_docs))]
+                        print([(fallback_doc['id'], fallback_doc['score']) for fallback_doc in fallback_docs])
+                        return fallback_docs
                     return []
             else:
                 # No documents retrieved
