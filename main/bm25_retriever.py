@@ -149,6 +149,7 @@ class BM25Retriever:
             (doc, score) for doc, score in results if score >= min_score
         ]
 
+        print(f"BM25 found {len(filtered_results)} relevant documents")
         # Return only documents
         return [doc for doc, score in filtered_results]
 

@@ -176,7 +176,30 @@ class VietnameseLegalRAG:
             
             # Improved similarity filtering logic
             if retrieved_docs:
-                # Check for high-quality documents first
+                # Apply reranking FIRST if enabled (before similarity filtering)
+                if use_reranking and self.reranker and retrieved_docs:
+                    print(f"Applying reranking to {len(retrieved_docs)} documents...")
+                    
+                    if Config.USE_SCORE_FUSION:
+                        # Use score fusion for better results
+                        retrieved_docs = self.reranker.rerank_with_fusion(
+                            query, 
+                            retrieved_docs, 
+                            alpha=Config.RERANKER_FUSION_ALPHA,
+                            top_k=Config.RERANKER_TOP_K
+                        )
+                    else:
+                        # Use pure reranker scores
+                        retrieved_docs = self.reranker.rerank_documents(
+                            query, 
+                            retrieved_docs, 
+                            top_k=Config.RERANKER_TOP_K
+                        )
+                    print(f"Reranking completed, returning {len(retrieved_docs)} documents")
+                    print([(retrieved_doc['id'], retrieved_doc['score']) for retrieved_doc in retrieved_docs])
+                    return retrieved_docs
+                
+                # Check for high-quality documents first (if no reranking)
                 high_quality_docs = []
                 moderate_quality_docs = []
                 
@@ -190,43 +213,21 @@ class VietnameseLegalRAG:
                 # Return high quality docs if available
                 if high_quality_docs:
                     print(f"Retrieved {len(high_quality_docs)} high-quality documents")
+                    print([(high_quality_doc['id'], high_quality_doc['score']) for high_quality_doc in high_quality_docs])
                     return high_quality_docs[:Config.TOP_K_RETRIEVAL]
                 
                 # Return moderate quality docs if no high quality ones
                 elif moderate_quality_docs:
                     print(f"Retrieved {len(moderate_quality_docs)} moderate-quality documents")
+                    print([(moderate_quality_doc['id'], moderate_quality_doc['score']) for moderate_quality_doc in moderate_quality_docs])
                     return moderate_quality_docs[:Config.TOP_K_RETRIEVAL]
                 
                 else:
                     print("No documents found with sufficient similarity scores")
                     return []
-            
-            # Apply reranking if enabled
-            if use_reranking and self.reranker and retrieved_docs:
-                print(f"Applying reranking to {len(retrieved_docs)} documents...")
-                
-                if Config.USE_SCORE_FUSION:
-                    # Use score fusion for better results
-                    retrieved_docs = self.reranker.rerank_with_fusion(
-                        query, 
-                        retrieved_docs, 
-                        alpha=Config.RERANKER_FUSION_ALPHA,
-                        top_k=Config.RERANKER_TOP_K
-                    )
-                else:
-                    # Use pure reranker scores
-                    retrieved_docs = self.reranker.rerank_documents(
-                        query, 
-                        retrieved_docs, 
-                        top_k=Config.RERANKER_TOP_K
-                    )
-                print(f"Reranking completed, returning {len(retrieved_docs)} documents")
             else:
-                # No reranking, limit results to original config
-                retrieved_docs = retrieved_docs[:Config.TOP_K_RETRIEVAL]
-            
-            print(f"Retrieved {len(retrieved_docs)} documents for query")
-            return retrieved_docs
+                # No documents retrieved
+                return []
             
         except Exception as e:
             print(f"Error retrieving documents: {e}")
@@ -285,7 +286,7 @@ Nội dung: {content}
             
             # Generate response
             messages = [HumanMessage(content=prompt)]
-            response = self.llm(messages)
+            response = self.llm.invoke(messages)
             
             answer = response.content
             
@@ -325,71 +326,10 @@ Nội dung: {content}
         response_lower = response.lower()
         return any(indicator in response_lower for indicator in negative_indicators)
     
-    def _enhanced_search_fallback(self, query: str) -> List[Dict[str, Any]]:
-        """Enhanced search fallback with multiple strategies"""
-        print("Attempting enhanced search fallback...")
-        
-        all_docs = []
-        
-        # Strategy 1: Lower similarity threshold
-        try:
-            if self.bm25_retriever and self.vector_store:
-                # BM25 with more results
-                bm25_results = self.bm25_retriever.get_relevant_documents(
-                    query, top_k=15  # Increased from default
-                )
-                
-                # Vector search with lower threshold
-                vector_results = self.vector_store.search_similar_documents(
-                    query, top_k=10  # Increased from default
-                )
-                
-                # Combine results with very low threshold
-                combined_docs = {}
-                
-                for doc in bm25_results:
-                    doc_id = doc.get('id', '')
-                    if doc_id and doc.get('score', 0) >= 0.1:  # Very low threshold
-                        combined_docs[doc_id] = {**doc, 'retrieval_method': 'bm25_enhanced'}
-                
-                for doc in vector_results:
-                    doc_id = doc.get('id', '')
-                    if doc_id and doc.get('score', 0) >= 0.15:  # Very low threshold
-                        if doc_id in combined_docs:
-                            combined_docs[doc_id]['retrieval_method'] = 'hybrid_enhanced'
-                        else:
-                            combined_docs[doc_id] = {**doc, 'retrieval_method': 'vector_enhanced'}
-                
-                all_docs = list(combined_docs.values())
-                
-        except Exception as e:
-            print(f"Error in enhanced search: {e}")
-        
-        # Strategy 2: Keyword-based search if still no results
-        if not all_docs:
-            try:
-                # Extract keywords from query
-                keywords = self.text_processor.extract_keywords(query)
-                if keywords:
-                    keyword_query = " ".join(keywords[:5])  # Use top 5 keywords
-                    
-                    if self.bm25_retriever:
-                        keyword_results = self.bm25_retriever.get_relevant_documents(
-                            keyword_query, top_k=10
-                        )
-                        all_docs.extend([{**doc, 'retrieval_method': 'keyword_fallback'} 
-                                       for doc in keyword_results if doc.get('score', 0) >= 0.05])
-                        
-            except Exception as e:
-                print(f"Error in keyword fallback: {e}")
-        
-        print(f"Enhanced search found {len(all_docs)} documents")
-        return all_docs[:Config.TOP_K_RETRIEVAL]
-    
     def answer_question(self, query: str, use_fallback: bool = True, refine_question: bool = True) -> Dict[str, Any]:
         """Answer a legal question using RAG with enhanced negative response handling and question refinement"""
         print(f"Processing question: {query}")
-        
+
         # Step 1: Refine the question if enabled
         original_query = query
         refinement_result = None
@@ -403,7 +343,7 @@ Nội dung: {content}
                 print(f"📝 Original: {query}")
                 print(f"✨ Refined: {refined_query}")
                 query = refined_query
-        
+
         # Step 2: Retrieve relevant documents using refined query
         retrieved_docs = self.retrieve_documents(query)
         
@@ -432,182 +372,95 @@ Nội dung: {content}
                     'question_refinement': refinement_result
                 }
             else:
-                # Try enhanced search before giving up
-                enhanced_docs = self._enhanced_search_fallback(query)
-                if enhanced_docs:
-                    enhanced_context = self.format_context(enhanced_docs)
-                    enhanced_answer = self.generate_answer(query, enhanced_context, False)
-                    
-                    return {
-                        'answer': enhanced_answer,
-                        'retrieved_documents': enhanced_docs,
-                        'fallback_used': True,
-                        'context': enhanced_context,
-                        'search_results': [],
-                        'search_results_html': "",
-                        'enhanced_search_used': True,
-                        'original_question': original_query,
-                        'refined_question': query,
-                        'question_refinement': refinement_result
-                    }
-                else:
-                    return {
-                        'answer': "Xin lỗi, tôi không tìm thấy thông tin pháp luật liên quan đến câu hỏi của bạn trong cơ sở dữ liệu nội bộ và cũng không thể tìm kiếm thông tin trên web. Vui lòng thử lại với câu hỏi khác hoặc liên hệ với chuyên gia pháp lý.",
-                        'retrieved_documents': [],
-                        'fallback_used': True,
-                        'search_results': [],
-                        'context': "",
-                        'search_results_html': "",
-                        'enhanced_search_used': False,
-                        'original_question': original_query,
-                        'refined_question': query,
-                        'question_refinement': refinement_result
-                    }
-        elif not retrieved_docs:
-            # Try enhanced search before giving negative response
-            enhanced_docs = self._enhanced_search_fallback(query)
-            if enhanced_docs:
-                enhanced_context = self.format_context(enhanced_docs)
-                enhanced_answer = self.generate_answer(query, enhanced_context, False)
-                
                 return {
-                    'answer': enhanced_answer,
-                    'retrieved_documents': enhanced_docs,
-                    'fallback_used': False,
-                    'context': enhanced_context,
-                    'search_results': [],
-                    'search_results_html': "",
-                    'enhanced_search_used': True,
-                    'original_question': original_query,
-                    'refined_question': query,
-                    'question_refinement': refinement_result
-                }
-            else:
-                return {
-                    'answer': "Xin lỗi, tôi không tìm thấy thông tin pháp luật liên quan đến câu hỏi của bạn trong cơ sở dữ liệu.",
+                    'answer': "Xin lỗi, tôi không tìm thấy thông tin pháp luật liên quan đến câu hỏi của bạn trong cơ sở dữ liệu nội bộ và cũng không thể tìm kiếm thông tin trên web. Vui lòng thử lại với câu hỏi khác hoặc liên hệ với chuyên gia pháp lý.",
                     'retrieved_documents': [],
-                    'fallback_used': False,
-                    'context': "",
+                    'fallback_used': True,
                     'search_results': [],
+                    'context': "",
                     'search_results_html': "",
-                    'enhanced_search_used': False,
                     'original_question': original_query,
                     'refined_question': query,
                     'question_refinement': refinement_result
                 }
-        
+        elif not retrieved_docs:
+            return {
+                'answer': "Xin lỗi, tôi không tìm thấy thông tin pháp luật liên quan đến câu hỏi của bạn trong cơ sở dữ liệu.",
+                'retrieved_documents': [],
+                'fallback_used': False,
+                'context': "",
+                'search_results': [],
+                'search_results_html': "",
+                'original_question': original_query,
+                'refined_question': query,
+                'question_refinement': refinement_result
+            }
+
         # Format context
         context = self.format_context(retrieved_docs)
-        
+
         # Generate answer
         answer = self.generate_answer(query, context, False)
-        
-        # Check if the generated answer is negative and retry with enhanced search
+
+        # Check if the generated answer is negative and retry with Google search
         if self._is_negative_response(answer) and use_fallback:
             print("🔍 Detected insufficient information response, activating search tools...")
             
             # Inform user that search is being performed
             search_notification = f"\n\n*🔍 Đang tìm kiếm thông tin bổ sung để trả lời câu hỏi của bạn...*"
             
-            # Try enhanced search first
-            enhanced_docs = self._enhanced_search_fallback(query)
-            
-            if enhanced_docs:
-                # Combine original and enhanced docs
-                all_docs = retrieved_docs + [doc for doc in enhanced_docs 
-                                           if doc.get('id') not in [d.get('id') for d in retrieved_docs]]
-                enhanced_context = self.format_context(all_docs[:Config.TOP_K_RETRIEVAL])
-                enhanced_answer = self.generate_answer(query, enhanced_context, False)
-                
-                # If still negative, try Google search
-                if self._is_negative_response(enhanced_answer) and Config.ENABLE_GOOGLE_SEARCH:
-                    print("📡 Enhanced search still insufficient, trying web search...")
-                    search_results = self.google_search.search_legal_info(query)
-                    
-                    if search_results:
-                        fallback_context = self.google_search.format_search_results(search_results)
-                        final_answer = self.generate_answer(query, fallback_context, True)
-                        
-                        # Add notification about web search usage (if enabled)
-                        if Config.SHOW_SOURCE_INFO:
-                            final_answer = f"{final_answer}\n\n*🌐 Thông tin này được tìm kiếm từ web do không tìm thấy đủ thông tin trong cơ sở dữ liệu pháp luật nội bộ.*"
-                        
-                        return {
-                            'answer': final_answer,
-                            'retrieved_documents': all_docs,
-                            'fallback_used': True,
-                            'context': enhanced_context,
-                            'search_results': search_results,
-                            'search_results_html': self.google_search.format_search_results_for_display(search_results),
-                            'enhanced_search_used': True,
-                            'search_triggered': True,
-                            'original_question': original_query,
-                            'refined_question': query,
-                            'question_refinement': refinement_result
-                        }
-                    else:
-                        # Web search failed, return enhanced answer with notification (if enabled)
-                        if Config.SHOW_SOURCE_INFO:
-                            enhanced_answer = f"{enhanced_answer}\n\n*🔍 Đã sử dụng tìm kiếm nâng cao trong cơ sở dữ liệu.*"
-                        
-                        return {
-                            'answer': enhanced_answer,
-                            'retrieved_documents': all_docs,
-                            'fallback_used': False,
-                            'context': enhanced_context,
-                            'search_results': [],
-                            'search_results_html': "",
-                            'enhanced_search_used': True,
-                            'search_triggered': True,
-                            'original_question': original_query,
-                            'refined_question': query,
-                            'question_refinement': refinement_result
-                        }
-                else:
-                    # Enhanced search was sufficient (if enabled)
-                    if Config.SHOW_SOURCE_INFO:
-                        enhanced_answer = f"{enhanced_answer}\n\n*🔍 Đã sử dụng tìm kiếm nâng cao để tìm thông tin này.*"
-                    
-                    return {
-                        'answer': enhanced_answer,
-                        'retrieved_documents': all_docs,
-                        'fallback_used': False,
-                        'context': enhanced_context,
-                        'search_results': [],
-                        'search_results_html': "",
-                        'enhanced_search_used': True,
-                        'search_triggered': True,
-                        'original_question': original_query,
-                        'refined_question': query,
-                        'question_refinement': refinement_result
-                    }
-            elif Config.ENABLE_GOOGLE_SEARCH:
-                # Try Google search as last resort
-                print("📡 Database search failed, trying web search as last resort...")
+            # Try Google search if enabled
+            if Config.ENABLE_GOOGLE_SEARCH:
+                print("📡 Trying web search...")
                 search_results = self.google_search.search_legal_info(query)
                 
                 if search_results:
-                    fallback_context = self.google_search.format_search_results(search_results)
-                    final_answer = self.generate_answer(query, fallback_context, True)
-                    
-                    # Add notification about web search usage (if enabled)
-                    if Config.SHOW_SOURCE_INFO:
-                        final_answer = f"{final_answer}\n\n*🌐 Thông tin này được tìm kiếm từ web do không tìm thấy trong cơ sở dữ liệu pháp luật nội bộ.*"
+                    # Generate enhanced response with web information
+                    web_context = self.google_search.format_search_results(search_results)
+                    combined_context = context + "\n\nThông tin bổ sung từ web:\n" + web_context
+                    enhanced_answer = self.generate_answer(query, combined_context, True)
                     
                     return {
-                        'answer': final_answer,
+                        'answer': enhanced_answer,
                         'retrieved_documents': retrieved_docs,
                         'fallback_used': True,
-                        'context': context,
+                        'context': combined_context,
                         'search_results': search_results,
                         'search_results_html': self.google_search.format_search_results_for_display(search_results),
-                        'enhanced_search_used': False,
                         'search_triggered': True,
                         'original_question': original_query,
                         'refined_question': query,
                         'question_refinement': refinement_result
                     }
-        
+                else:
+                    # Google search found nothing useful
+                    return {
+                        'answer': answer + "\n\n*⚠️ Tôi đã cố gắng tìm kiếm thêm thông tin trên web nhưng không tìm thấy kết quả phù hợp. Để có câu trả lời chính xác hơn, bạn có thể tham khảo ý kiến chuyên gia pháp lý.*",
+                        'retrieved_documents': retrieved_docs,
+                        'fallback_used': True,
+                        'context': context,
+                        'search_results': [],
+                        'search_results_html': "",
+                        'search_triggered': True,
+                        'original_question': original_query,
+                        'refined_question': query,
+                        'question_refinement': refinement_result
+                    }
+            else:
+                # Google search disabled
+                return {
+                    'answer': answer + "\n\n*⚠️ Để có câu trả lời chính xác hơn, bạn có thể tham khảo ý kiến chuyên gia pháp lý.*",
+                    'retrieved_documents': retrieved_docs,
+                    'fallback_used': False,
+                    'context': context,
+                    'search_results': [],
+                    'search_results_html': "",
+                    'original_question': original_query,
+                    'refined_question': query,
+                    'question_refinement': refinement_result
+                }
+
+        # Return successful result
         return {
             'answer': answer,
             'retrieved_documents': retrieved_docs,
@@ -615,8 +468,6 @@ Nội dung: {content}
             'context': context,
             'search_results': [],
             'search_results_html': "",
-            'enhanced_search_used': False,
-            'search_triggered': False,
             'original_question': original_query,
             'refined_question': query,
             'question_refinement': refinement_result

@@ -29,9 +29,9 @@ class Config:
     STOPWORDS_PATH = "data/utils/stopwords.txt"
 
     # RAG Configuration
-    TOP_K_RETRIEVAL = 5
-    BM25_TOP_K = 10
-    SIMILARITY_THRESHOLD = 0.7
+    TOP_K_RETRIEVAL = 15
+    BM25_TOP_K = 15
+    SIMILARITY_THRESHOLD = 0.5
 
     # Reranker Configuration
     ENABLE_RERANKING = True
@@ -39,7 +39,7 @@ class Config:
     RERANKER_TOP_K = 10  # Final number of documents after reranking
     RERANK_BEFORE_RETRIEVAL_TOP_K = 15  # Retrieve more docs before ranking
     USE_SCORE_FUSION = True  # Use fusion between original and reranker scores
-    RERANKER_FUSION_ALPHA = 0.7  # Weight for reranker score in fusion (0-1)
+    RERANKER_FUSION_ALPHA = 0.6  # Weight for reranker score in fusion (0-1)
 
     # Google Search Configuration
     ENABLE_GOOGLE_SEARCH = True

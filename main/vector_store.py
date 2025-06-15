@@ -212,7 +212,7 @@ class QdrantVectorStore:
                     }
                 )
 
-            print(f"Found {len(results)} similar documents")
+            print(f"Vector DB found {len(results)} similar documents")
             return results
 
         except Exception as e:

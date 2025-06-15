@@ -341,10 +341,6 @@ class VietnameseLegalChatbot:
                         if Config.SHOW_SEARCH_TRIGGER_INFO:
                             source_info = "\n\n*🔍➡️🌐 Không tìm thấy đủ thông tin trong tài liệu tham khảo nên đã tự động tìm kiếm trên web.*"
                         self.metrics["fallback_queries"] += 1
-                    elif result.get('enhanced_search_used'):
-                        if Config.SHOW_SEARCH_TRIGGER_INFO:
-                            source_info = "\n\n*🔍➡️🔎 Đã tự động sử dụng tìm kiếm nâng cao để tìm thông tin bổ sung.*"
-                        self.metrics["fallback_queries"] += 1
                     else:
                         if Config.SHOW_SEARCH_TRIGGER_INFO:
                             source_info = "\n\n*🔍 Đã kích hoạt tìm kiếm tự động.*"
@@ -354,9 +350,6 @@ class VietnameseLegalChatbot:
                     if result.get('search_results'):
                         if Config.SHOW_SOURCE_INFO:
                             source_info = "\n\n*🌐 Thông tin này được tìm kiếm từ web do không tìm thấy đủ thông tin trong cơ sở dữ liệu pháp luật nội bộ.*"
-                    elif result.get('enhanced_search_used'):
-                        if Config.SHOW_SOURCE_INFO:
-                            source_info = "\n\n*🔍 Sử dụng tìm kiếm nâng cao.*"
                 else:
                     self.metrics["successful_queries"] += 1
                     if Config.SHOW_SOURCE_INFO:
@@ -411,11 +404,12 @@ class VietnameseLegalChatbot:
                 # Safe access to document properties
                 title = str(doc.get('title', 'Không có tiêu đề'))
                 content = str(doc.get('content', ''))
+                law_id = str(doc['metadata'].get('law_id', ''))
                 
                 # Truncate content for display
                 display_content = content[:200] + "..." if len(content) > 200 else content
                 
-                docs_html += f"### 📄 {i}. {title}\n"
+                docs_html += f"### 📄 {i}. ({law_id}) {title}\n"
                 docs_html += f"**📝 Nội dung:** {display_content}\n\n"
                 docs_html += "---\n\n"
             
