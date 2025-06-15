@@ -41,7 +41,7 @@ class BM25Retriever:
             self.tokenized_corpus.append(tokens)
 
         # Build BM25 index
-        self.bm25 = BM25Okapi(self.tokenized_corpus)
+        self.bm25 = BM25Okapi(self.tokenized_corpus, b=Config.BM25_B, k1=Config.BM25_K1)
 
         print(f"BM25 index built with {len(self.documents)} documents")
 

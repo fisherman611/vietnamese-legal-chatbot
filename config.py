@@ -14,10 +14,12 @@ class Config:
     # QDrant Configuration
     QDRANT_URL = os.getenv("QDRANT_URL")
     QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
-    COLLECTION_NAME = "final_vietnamese_legal_corpus"
-
+    
     # Embedding configuration
-    EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    # EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    EMBEDDING_MODEL = "bkai-foundation-models/vietnamese-bi-encoder"
+    
+    COLLECTION_NAME = "final_vietnamese_legal_corpus" if EMBEDDING_MODEL == "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2" else "bkai_biencoder_vietnamese_legal_corpus"
 
     # Text Processing Configuration
     CHUNK_SIZE = 512
@@ -29,14 +31,16 @@ class Config:
     STOPWORDS_PATH = "data/utils/stopwords.txt"
 
     # RAG Configuration
-    TOP_K_RETRIEVAL = 15
+    TOP_K_RETRIEVAL = 20
     BM25_TOP_K = 20
+    BM25_B = 0.65
+    BM25_K1 = 1.2
     SIMILARITY_THRESHOLD = 0.25
 
     # Reranker Configuration
     ENABLE_RERANKING = True
     RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-    RERANKER_TOP_K = 10
+    RERANKER_TOP_K = 20
     RERANK_BEFORE_RETRIEVAL_TOP_K = 25
     USE_SCORE_FUSION = True
     RERANKER_FUSION_ALPHA = 0.8
