@@ -26,7 +26,7 @@ class RAGEvaluator:
         self.rag.setup_indices(documents, force_rebuild=False)
         print(f"✅ RAG system ready with {len(documents)} documents")
         
-    def retrieve_documents_with_method(self, query: str, method: str ="hybrid_rerank", top_k: int =100) -> List[Dict[str, Any]]:
+    def retrieve_documents_with_method(self, query: str, method: str ="hybrid_rerank", top_k: int =20) -> List[Dict[str, Any]]:
         """
         Retrieve documents using specific method
         
@@ -137,7 +137,7 @@ class RAGEvaluator:
     def evaluate_retrieval_method(self, 
                                 questions_df: pd.DataFrame,
                                 method: str = "hybrid_rerank",
-                                top_k: int = 100,
+                                top_k: int = 20,
                                 k_values: List[int] = None) -> Dict[str, Any]:
         """
         Evaluate retrieval performance for a specific method
@@ -152,7 +152,7 @@ class RAGEvaluator:
             Dictionary with detailed metrics
         """
         if k_values is None:
-            k_values = [1, 10, 100]
+            k_values = [1, 10, 20]
         
         method_names = {
             'bm25': 'BM25 Only',
@@ -288,7 +288,7 @@ class RAGEvaluator:
         """Compare all four retrieval methods on the given dataset"""
         
         if k_values is None:
-            k_values = [1, 3, 5, 10]
+            k_values = [1, 10, 20]
         
         print("⚖️ Comparing all retrieval methods...")
         
@@ -417,7 +417,7 @@ class RAGEvaluator:
         print(f"{'Avg Time:':<15} {metrics['avg_retrieval_time']:<10.3f}s")
         print("=" * 80)
     
-    def export_detailed_metrics(self, results: Dict[str, Any], filename: str = "detailed_metrics.csv"):
+    def export_detailed_metrics(self, results: Dict[str, Any], filename: str = "results/detailed_metrics.csv"):
         """Export detailed per-question metrics to CSV for analysis"""
         detailed_results = results['detailed_results']
         k_values = results['k_values']
@@ -473,7 +473,7 @@ def main():
     print("EVALUATING ALL RETRIEVAL METHODS ON TRAIN DATASET")
     print(f"{'='*80}")
     
-    k_values = [1, 10, 100]
+    k_values = [1, 10, 20]
     
     # Run comprehensive comparison
     train_comparison = evaluator.compare_all_retrieval_methods(train_df, k_values=k_values)
@@ -483,7 +483,7 @@ def main():
         evaluator.print_comparison_table(train_comparison['comparison_results'], k_values)
     
     # Save comprehensive results
-    output_file = "train_rag_evaluation_results.json"
+    output_file = "results/evaluation_results.json"
     final_results = {
         'train_comparison_results': train_comparison['comparison_results'],
         'evaluation_timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -509,7 +509,7 @@ def main():
                     'detailed_results': detailed_results,
                     'k_values': k_values
                 }
-                filename = f"train_detailed_metrics_{method}.csv"
+                filename = f"detailed_metrics_{method}.csv"
                 evaluator.export_detailed_metrics(mock_results, filename)
     
     # Print summary recommendations
