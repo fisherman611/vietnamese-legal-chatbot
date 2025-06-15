@@ -484,7 +484,7 @@ def main():
         evaluator.print_comparison_table(train_comparison['comparison_results'], k_values)
     
     # Save comprehensive results
-    output_file = f"train_rag_evaluation_results_B_{Config.COLLECTION_NAME}.json"
+    output_file = f"evaluation_results_{Config.COLLECTION_NAME}.json"
     final_results = {
         'train_comparison_results': train_comparison['comparison_results'],
         'evaluation_timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -510,7 +510,7 @@ def main():
                     'detailed_results': detailed_results,
                     'k_values': k_values
                 }
-                filename = f"train_detailed_metrics_{method}_{Config.COLLECTION_NAME}.csv"
+                filename = f"detailed_{method}_{Config.COLLECTION_NAME}.csv"
                 evaluator.export_detailed_metrics(mock_results, filename)
     
     # Print summary recommendations
