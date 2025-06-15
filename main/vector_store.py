@@ -200,6 +200,13 @@ class QdrantVectorStore:
             )
 
             # Format results
+            scores = []
+            for result in search_results:
+                scores.append(result.score)
+            
+            max_score = max(scores)
+            min_score = min(scores)
+            
             results = []
             for result in search_results:
                 results.append(
@@ -207,7 +214,7 @@ class QdrantVectorStore:
                         "id": result.payload.get("article_id", ""),
                         "title": result.payload.get("title", ""),
                         "content": result.payload.get("content", ""),
-                        "score": result.score,
+                        "score": float((result.score - min_score) / (max_score - min_score)) if max_score > 0 and min_score > 0 and max_score != min_score else 0,
                         "metadata": result.payload.get("metadata", {}),
                     }
                 )

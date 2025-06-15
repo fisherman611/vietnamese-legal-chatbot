@@ -139,29 +139,26 @@ class BM25Retriever:
         return results
 
     def get_relevant_documents(
-        self, query: str, top_k: int = None, min_score: float = None
+        self, query: str, top_k: int = None
     ) -> List[Dict[str, Any]]:
-        """Get relevant documents above minimum score threshold"""
-        # Set default minimum score for BM25 (more lenient than vector search)
-        if min_score is None:
-            min_score = 1.0  # Minimum BM25 score threshold
-            
+        """Get relevant documents using BM25"""
         results = self.search(query, top_k)
 
         # Filter by minimum score and enhance with score normalization
         filtered_results = []
         max_score = max([score for _, score in results]) if results else 0
+        min_score = min([score for _, score in results]) if results else 0
         
         for doc, score in results:
             if score >= min_score:
                 # Add normalized score for better comparison
                 doc_with_score = doc.copy()
-                doc_with_score['score'] = score
-                doc_with_score['normalized_score'] = score / max_score if max_score > 0 else 0
+                # doc_with_score['score'] = score
+                doc_with_score['score'] = float((score - min_score) / (max_score - min_score)) if max_score > 0 and min_score > 0 and max_score != min_score else 0
                 doc_with_score['retrieval_method'] = 'bm25'
                 filtered_results.append(doc_with_score)
 
-        print(f"BM25 found {len(filtered_results)} relevant documents (min_score={min_score})")
+        print(f"BM25 found {len(filtered_results)} relevant documents")
         return filtered_results
 
     def search_with_keywords(

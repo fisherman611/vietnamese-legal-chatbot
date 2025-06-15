@@ -12,6 +12,7 @@ import time
 
 from main.chatbot import VietnameseLegalRAG
 from utils.data_loader import LegalDataLoader
+from config import Config
 
 class RAGEvaluator:
     def __init__(self):
@@ -137,7 +138,7 @@ class RAGEvaluator:
     def evaluate_retrieval_method(self, 
                                 questions_df: pd.DataFrame,
                                 method: str = "hybrid_rerank",
-                                top_k: int = 20,
+                                top_k: int = 100,
                                 k_values: List[int] = None) -> Dict[str, Any]:
         """
         Evaluate retrieval performance for a specific method
@@ -288,7 +289,7 @@ class RAGEvaluator:
         """Compare all four retrieval methods on the given dataset"""
         
         if k_values is None:
-            k_values = [1, 10, 20]
+            k_values = [1, 3, 5, 10]
         
         print("⚖️ Comparing all retrieval methods...")
         
@@ -417,7 +418,7 @@ class RAGEvaluator:
         print(f"{'Avg Time:':<15} {metrics['avg_retrieval_time']:<10.3f}s")
         print("=" * 80)
     
-    def export_detailed_metrics(self, results: Dict[str, Any], filename: str = "results/detailed_metrics.csv"):
+    def export_detailed_metrics(self, results: Dict[str, Any], filename: str = "detailed_metrics.csv"):
         """Export detailed per-question metrics to CSV for analysis"""
         detailed_results = results['detailed_results']
         k_values = results['k_values']
@@ -483,7 +484,7 @@ def main():
         evaluator.print_comparison_table(train_comparison['comparison_results'], k_values)
     
     # Save comprehensive results
-    output_file = "results/evaluation_results.json"
+    output_file = f"train_rag_evaluation_results_B_{Config.COLLECTION_NAME}.json"
     final_results = {
         'train_comparison_results': train_comparison['comparison_results'],
         'evaluation_timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -509,7 +510,7 @@ def main():
                     'detailed_results': detailed_results,
                     'k_values': k_values
                 }
-                filename = f"detailed_metrics_{method}.csv"
+                filename = f"train_detailed_metrics_{method}_{Config.COLLECTION_NAME}.csv"
                 evaluator.export_detailed_metrics(mock_results, filename)
     
     # Print summary recommendations
