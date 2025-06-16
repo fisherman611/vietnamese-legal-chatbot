@@ -1,6 +1,10 @@
-# **Vietnamese Legal Chatbot**
+# **Vietnamese Legal Chatbot** 🏛️⚖️
 
-A Retrieval-Augmented Generation (RAG) system designed to answer legal questions in Vietnamese, providing accurate and contextually relevant responses based on Vietnamese legal documents. [Demo](https://huggingface.co/spaces/fisherman611/vietnamese-legal-chatbot)
+A Retrieval-Augmented Generation (RAG) system designed to answer legal questions in Vietnamese, providing accurate and contextually relevant responses based on Vietnamese legal documents.
+
+[![Demo](https://img.shields.io/badge/🚀-Live%20Demo-blue)](https://huggingface.co/spaces/fisherman611/vietnamese-legal-chatbot)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 
 ## **Features**
 
@@ -124,6 +128,17 @@ flowchart LR
 ### Generation Layer
 - **Context Builder** - Formats retrieved documents into a prompt context
 - **LLM (Gemini)** - Generates natural language responses based on the retrieved context
+
+## **Results**
+
+| Method | MRR | Coverage | R@1 | R@10 | R@20 | MAP@20 |
+|--------|-----|----------|-----|------|------|--------|
+| **Hybrid + Reranking** | **0.6082** | **88.99%** | **48.2%** | **82.7%** | **88.4%** | **62.4%** |
+| Hybrid (BM25 + Vector) | 0.5801 | 88.20% | 43.1% | 83.3% | 87.5% | 59.2% |
+| BM25 Only | 0.5545 | 78.94% | 43.0% | 76.8% | 78.3% | 56.5% |
+| Vector Only | 0.4691 | 68.09% | 36.4% | 66.6% | 67.3% | 47.1% |
+
+*Evaluation conducted on `train_qna.csv`*
 
 ## **Installation**
 
