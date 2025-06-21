@@ -67,6 +67,23 @@ class Config:
     SHOW_SOURCE_INFO = False  # 📚 Dựa trên X tài liệu, 🌐 Thông tin từ web
     SHOW_LEGAL_DISCLAIMER = False  # Lưu ý về tìm chuyên gia pháp lý
 
+    # Legal Domain Filtering Settings
+    ENABLE_LEGAL_DOMAIN_FILTER = True  # Only answer legal questions
+    LEGAL_DOMAIN_CONFIDENCE_THRESHOLD = 0.3  # Minimum confidence to consider a question legal
+    USE_LLM_FOR_LEGAL_DETECTION = True  # Use LLM for more accurate legal domain detection
+    NON_LEGAL_RESPONSE_MESSAGE = """Xin lỗi, tôi là trợ lý pháp lý chuyên biệt và chỉ có thể trả lời các câu hỏi liên quan đến pháp luật Việt Nam.
+
+Tôi có thể giúp bạn với:
+• Quyền và nghĩa vụ theo pháp luật
+• Thủ tục pháp lý và hành chính
+• Quy định về doanh nghiệp, lao động, thuế
+• Luật gia đình, hôn nhân, thừa kế
+• Bất động sản và quyền sử dụng đất
+• Hợp đồng và giao dịch dân sự
+• Tranh chấp và giải quyết khiếu nại
+
+Vui lòng đặt câu hỏi về các vấn đề pháp lý và tôi sẽ cố gắng hỗ trợ bạn!"""
+
     # System Prompt
     SYSTEM_PROMPT = """Bạn là trợ lý pháp lý thông minh chuyên sâu về luật pháp Việt Nam. Nhiệm vụ của bạn là cung cấp các câu trả lời chính xác và dễ hiểu cho các câu hỏi pháp lý, dựa trên các tài liệu luật được cung cấp.
 

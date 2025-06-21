@@ -351,12 +351,20 @@ class VietnameseLegalChatbot:
                         if Config.SHOW_SOURCE_INFO:
                             source_info = "\n\n*🌐 Thông tin này được tìm kiếm từ web do không tìm thấy đủ thông tin trong cơ sở dữ liệu pháp luật nội bộ.*"
                 else:
-                    self.metrics["successful_queries"] += 1
-                    if Config.SHOW_SOURCE_INFO:
-                        source_info = f"\n\n*📚 Dựa trên {len(result.get('retrieved_documents', []))} tài liệu pháp luật.*"
+                    # Check if this was a rejected non-legal question
+                    if result.get('rejected_non_legal'):
+                        # Don't count as successful or fallback - it's a rejection
+                        pass
+                    else:
+                        self.metrics["successful_queries"] += 1
+                        if Config.SHOW_SOURCE_INFO:
+                            source_info = f"\n\n*📚 Dựa trên {len(result.get('retrieved_documents', []))} tài liệu pháp luật.*"
             else:
                 # Update metrics without showing info
-                if result.get('search_triggered') or result.get('fallback_used'):
+                if result.get('rejected_non_legal'):
+                    # Don't count rejected questions in success/fallback metrics
+                    pass
+                elif result.get('search_triggered') or result.get('fallback_used'):
                     self.metrics["fallback_queries"] += 1
                 else:
                     self.metrics["successful_queries"] += 1
@@ -380,6 +388,10 @@ class VietnameseLegalChatbot:
             
             # Format retrieved documents for display
             docs_info = self._format_retrieved_documents(result.get('retrieved_documents', []))
+            
+            # If this was a rejected non-legal question, show legal guidance instead
+            if result.get('rejected_non_legal'):
+                docs_info = self._format_legal_guidance()
             
             processing_status = f"✅ Hoàn thành ({response_time:.1f}s)"
             
@@ -416,6 +428,24 @@ class VietnameseLegalChatbot:
             return docs_html
         except Exception as e:
             return f"📄 **Lỗi hiển thị tài liệu: {str(e)}**"
+    
+    def _format_legal_guidance(self):
+        """Format legal guidance for rejected non-legal questions"""
+        return """## 📚 Hướng dẫn sử dụng trợ lý pháp lý
+
+Câu hỏi của bạn không thuộc lĩnh vực pháp luật mà tôi có thể hỗ trợ.
+
+### ⚖️ Tôi có thể giúp bạn với:
+- **Doanh nghiệp**: Thành lập, giải thể, vốn điều lệ, giấy phép kinh doanh
+- **Lao động**: Hợp đồng lao động, lương, nghỉ phép, sa thải, bảo hiểm
+- **Thuế**: Kê khai thuế, miễn thuế, thuế thu nhập cá nhân/doanh nghiệp
+- **Bất động sản**: Mua bán nhà đất, chuyển nhượng, sổ đỏ, quyền sử dụng đất
+- **Gia đình**: Hôn nhân, ly hôn, thừa kế, nuôi con, quyền con cái
+- **Dân sự**: Hợp đồng, tranh chấp, bồi thường, quyền sở hữu
+- **Hành chính**: Thủ tục pháp lý, giấy tờ, cơ quan nhà nước
+
+### 💡 Gợi ý:
+Hãy đặt câu hỏi cụ thể về các vấn đề pháp lý trên để nhận được hỗ trợ tốt nhất!"""
     
     def get_sample_questions(self):
         """Get categorized sample questions"""

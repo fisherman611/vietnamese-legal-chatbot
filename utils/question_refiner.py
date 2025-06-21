@@ -1,6 +1,6 @@
+from typing import List, Dict, Any, Optional
 import re
 import json
-from typing import Dict, List, Tuple, Optional, Any
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from config import Config
@@ -974,3 +974,137 @@ Chỉ trả về JSON:""",
                 break
         
         return current_question if current_question != question else None 
+
+    def is_legal_question(self, question: str, use_llm: bool = True) -> Dict[str, Any]:
+        """
+        Determine if a question is related to legal matters
+        
+        Args:
+            question: The user's question
+            use_llm: Whether to use LLM for more accurate detection
+            
+        Returns:
+            Dictionary containing detection results and confidence
+        """
+        result = {
+            "is_legal": False,
+            "confidence": 0.0,
+            "detected_contexts": [],
+            "legal_keywords_found": [],
+            "method_used": "keyword_based"
+        }
+        
+        # Basic keyword-based detection
+        question_lower = question.lower().strip()
+        
+        # Check for direct legal keywords
+        legal_keywords_found = []
+        
+        # General legal terms that strongly indicate legal questions
+        strong_legal_indicators = [
+            "luật", "điều luật", "quy định", "nghị định", "thông tư", "quyết định",
+            "bộ luật", "hiến pháp", "pháp luật", "pháp lệnh", "văn bản pháp lý",
+            "quyền", "nghĩa vụ", "vi phạm", "xử phạt", "trách nhiệm pháp lý",
+            "tòa án", "kiện", "khiếu nại", "tố cáo", "luật sư", "công chứng",
+            "chế tài", "bồi thường", "án phạt", "hình phạt", "tranh chấp pháp lý"
+        ]
+        
+        # Check for strong legal indicators
+        for keyword in strong_legal_indicators:
+            if keyword in question_lower:
+                legal_keywords_found.append(keyword)
+        
+        # Check for context-specific legal terms
+        context_score = 0
+        detected_contexts = self._detect_legal_context(question)
+        
+        # If any legal context is detected, it's likely a legal question
+        if detected_contexts:
+            result["detected_contexts"] = detected_contexts
+            context_score = len(detected_contexts) * 0.3
+        
+        # Check for legal abbreviations
+        for abbr, full_form in self.legal_abbreviations.items():
+            if abbr in question_lower or full_form in question_lower:
+                legal_keywords_found.append(f"{abbr} ({full_form})")
+        
+        # Calculate confidence based on findings
+        keyword_score = min(len(legal_keywords_found) * 0.2, 0.8)
+        base_confidence = keyword_score + context_score
+        
+        result["legal_keywords_found"] = legal_keywords_found
+        
+        # Use LLM for more sophisticated detection if available
+        if use_llm and self.llm and base_confidence < 0.7:
+            try:
+                llm_result = self._llm_detect_legal_domain(question)
+                if llm_result:
+                    result["is_legal"] = llm_result["is_legal"]
+                    result["confidence"] = llm_result["confidence"]
+                    result["method_used"] = "llm_enhanced"
+                    result["llm_reasoning"] = llm_result.get("reasoning", "")
+                    return result
+            except Exception as e:
+                print(f"Error in LLM legal domain detection: {e}")
+        
+        # Final decision based on keyword and context analysis
+        result["confidence"] = min(base_confidence, 1.0)
+        result["is_legal"] = result["confidence"] >= 0.3 or len(legal_keywords_found) > 0
+        
+        return result
+    
+    def _llm_detect_legal_domain(self, question: str) -> Optional[Dict[str, Any]]:
+        """Use LLM to detect if question is in legal domain"""
+        if not self.llm:
+            return None
+        
+        prompt = PromptTemplate(
+            template="""Bạn là chuyên gia phân loại câu hỏi. Hãy xác định xem câu hỏi sau có liên quan đến pháp luật Việt Nam hay không.
+
+Câu hỏi pháp luật thường bao gồm:
+- Hỏi về quyền và nghĩa vụ theo pháp luật
+- Các thủ tục, quy trình pháp lý
+- Quy định, điều luật, nghị định, thông tư
+- Tranh chấp, vi phạm, xử phạt
+- Hợp đồng, giao dịch có tính pháp lý
+- Doanh nghiệp, lao động, thuế, bất động sản, gia đình (theo luật)
+- Tòa án, luật sư, công chứng
+- Hình sự, dân sự, hành chính
+
+Câu hỏi KHÔNG phải pháp luật:
+- Câu hỏi về kỹ thuật, công nghệ
+- Toán học, khoa học
+- Y tế (trừ khi hỏi về quy định y tế)
+- Nấu ăn, du lịch, giải trí
+- Lịch sử, địa lý (trừ khi liên quan luật)
+- Thể thao, văn học, nghệ thuật
+
+Câu hỏi: "{question}"
+
+Trả lời theo định dạng JSON:
+{{"is_legal": true/false, "confidence": 0.0-1.0, "reasoning": "lý do ngắn gọn"}}
+
+Chỉ trả về JSON, không có text khác:""",
+            input_variables=["question"]
+        )
+        
+        try:
+            response = self.llm.invoke(prompt.format(question=question))
+            content = response.content.strip()
+            
+            # Extract JSON from response
+            json_content = self._extract_json_from_response(content)
+            if json_content:
+                result = json.loads(json_content)
+                # Validate the result
+                if isinstance(result.get("is_legal"), bool) and isinstance(result.get("confidence"), (int, float)):
+                    return {
+                        "is_legal": result["is_legal"],
+                        "confidence": float(result["confidence"]),
+                        "reasoning": result.get("reasoning", "")
+                    }
+            
+        except Exception as e:
+            print(f"Error in LLM legal domain detection: {e}")
+        
+        return None 

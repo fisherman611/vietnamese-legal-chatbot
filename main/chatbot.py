@@ -366,6 +366,38 @@ Nội dung: {content}
         """Answer a legal question using RAG with enhanced negative response handling and question refinement"""
         print(f"Processing question: {query}")
 
+        # Initialize legal_check variable
+        legal_check = None
+
+        # Step 0: Legal domain filtering (if enabled)
+        if Config.ENABLE_LEGAL_DOMAIN_FILTER:
+            print("🔍 Checking if question is legal-related...")
+            legal_check = self.question_refiner.is_legal_question(
+                query, 
+                use_llm=Config.USE_LLM_FOR_LEGAL_DETECTION
+            )
+            
+            print(f"Legal detection result: {legal_check}")
+            
+            # If question is not legal-related, return early
+            if not legal_check["is_legal"] or legal_check["confidence"] < Config.LEGAL_DOMAIN_CONFIDENCE_THRESHOLD:
+                print(f"Question rejected: Not legal-related (confidence: {legal_check['confidence']:.2f})")
+                return {
+                    'answer': Config.NON_LEGAL_RESPONSE_MESSAGE,
+                    'retrieved_documents': [],
+                    'fallback_used': False,
+                    'context': "",
+                    'search_results': [],
+                    'search_results_html': "",
+                    'original_question': query,
+                    'refined_question': query,
+                    'question_refinement': None,
+                    'legal_domain_check': legal_check,
+                    'rejected_non_legal': True
+                }
+            else:
+                print(f"Question accepted: Legal-related (confidence: {legal_check['confidence']:.2f})")
+
         # Step 1: Refine the question if enabled
         original_query = query
         refinement_result = None
@@ -405,7 +437,9 @@ Nội dung: {content}
                     'search_results_html': self.google_search.format_search_results_for_display(search_results),
                     'original_question': original_query,
                     'refined_question': query,
-                    'question_refinement': refinement_result
+                    'question_refinement': refinement_result,
+                    'legal_domain_check': legal_check if Config.ENABLE_LEGAL_DOMAIN_FILTER else None,
+                    'rejected_non_legal': False
                 }
             else:
                 return {
@@ -417,7 +451,9 @@ Nội dung: {content}
                     'search_results_html': "",
                     'original_question': original_query,
                     'refined_question': query,
-                    'question_refinement': refinement_result
+                    'question_refinement': refinement_result,
+                    'legal_domain_check': legal_check if Config.ENABLE_LEGAL_DOMAIN_FILTER else None,
+                    'rejected_non_legal': False
                 }
         elif not retrieved_docs:
             return {
@@ -429,7 +465,9 @@ Nội dung: {content}
                 'search_results_html': "",
                 'original_question': original_query,
                 'refined_question': query,
-                'question_refinement': refinement_result
+                'question_refinement': refinement_result,
+                'legal_domain_check': legal_check if Config.ENABLE_LEGAL_DOMAIN_FILTER else None,
+                'rejected_non_legal': False
             }
 
         # Format context
@@ -466,7 +504,9 @@ Nội dung: {content}
                         'search_triggered': True,
                         'original_question': original_query,
                         'refined_question': query,
-                        'question_refinement': refinement_result
+                        'question_refinement': refinement_result,
+                        'legal_domain_check': legal_check if Config.ENABLE_LEGAL_DOMAIN_FILTER else None,
+                        'rejected_non_legal': False
                     }
                 else:
                     # Google search found nothing useful
@@ -480,7 +520,9 @@ Nội dung: {content}
                         'search_triggered': True,
                         'original_question': original_query,
                         'refined_question': query,
-                        'question_refinement': refinement_result
+                        'question_refinement': refinement_result,
+                        'legal_domain_check': legal_check if Config.ENABLE_LEGAL_DOMAIN_FILTER else None,
+                        'rejected_non_legal': False
                     }
             else:
                 # Google search disabled
@@ -493,7 +535,9 @@ Nội dung: {content}
                     'search_results_html': "",
                     'original_question': original_query,
                     'refined_question': query,
-                    'question_refinement': refinement_result
+                    'question_refinement': refinement_result,
+                    'legal_domain_check': legal_check if Config.ENABLE_LEGAL_DOMAIN_FILTER else None,
+                    'rejected_non_legal': False
                 }
 
         # Return successful result
@@ -506,7 +550,9 @@ Nội dung: {content}
             'search_results_html': "",
             'original_question': original_query,
             'refined_question': query,
-            'question_refinement': refinement_result
+            'question_refinement': refinement_result,
+            'legal_domain_check': legal_check if Config.ENABLE_LEGAL_DOMAIN_FILTER else None,
+            'rejected_non_legal': False
         }
     
     def get_system_status(self) -> Dict[str, Any]:
