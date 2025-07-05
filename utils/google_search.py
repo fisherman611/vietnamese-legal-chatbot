@@ -23,6 +23,7 @@ class GoogleSearchTool:
             # Enhanced Vietnamese legal query patterns
             enhanced_queries = [
                 f"{query} luật pháp Việt Nam site:thuvienphapluat.vn",
+                f"{query} luật pháp Việt Nam site: luatvietnam.vn"
                 f"{query} pháp luật Việt Nam site:moj.gov.vn",
                 f"{query} quy định pháp luật Việt Nam",
                 f"{query} luật việt nam điều khoản",
